@@ -6,8 +6,8 @@ package:
   version: ${{ version | replace(".beta", "b0") }}
 
 source:
-  url: https://github.com/linux-credentials/oo7/archive/refs/tags/${{ version }}.tar.gz
-  sha256: b3e03aaaff81d68730d67392a135ac3fdfdf022880c66632ab188d2fe084cda3
+  git: https://github.com/linux-credentials/oo7.git
+  tag: ${{ version }}
 
 build:
   number: 0
