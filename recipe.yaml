@@ -1,0 +1,47 @@
+context:
+  version: 0.7.0.beta
+
+package:
+  name: oo7
+  version: ${{ version | replace(".beta", "b0") }}
+
+source:
+  url: https://github.com/linux-credentials/oo7/archive/refs/tags/${{ version }}.tar.gz
+  sha256: b3e03aaaff81d68730d67392a135ac3fdfdf022880c66632ab188d2fe084cda3
+
+build:
+  number: 0
+  skip:
+    - not linux
+  script:
+    - cargo install --locked --no-track --root "$PREFIX" --path server --bins
+    - cargo install --locked --no-track --root "$PREFIX" --path cli --bins
+    # systemd user unit pointing at this prefix (conda rewrites the build prefix on install).
+    - mkdir -p "$PREFIX/share/oo7"
+    - sed -e "s|@libexecdir@/@binary@|$PREFIX/bin/oo7-daemon|" -e "s|@dbus_known_name@|org.freedesktop.secrets|" server/data/oo7-daemon.service.in > "$PREFIX/share/oo7/oo7-daemon.service"
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - rust >=1.95
+    - pkg-config
+  host:
+    - gettext
+    - openssl
+  run:
+    - gettext
+
+tests:
+  - script:
+      - test -x $PREFIX/bin/oo7-daemon
+      - test -x $PREFIX/bin/oo7-daemon-login
+      - oo7-daemon --help
+      - test -f $PREFIX/share/oo7/oo7-daemon.service
+
+about:
+  summary: Secret Service daemon (oo7-daemon) and CLI from the oo7 project
+  homepage: https://github.com/linux-credentials/oo7
+  repository: https://github.com/linux-credentials/oo7
+  license: MIT
+  license_file: LICENSE
